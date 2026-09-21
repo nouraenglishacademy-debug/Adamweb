@@ -1,1 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر التطبيقات والألعاب السحابي</title>
+    <!-- استدعاء مكتبة Supabase للربط السحابي -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f4f4f9; margin: 0; padding: 15px; color: #333; }
+        header { background: #1a1a1a; color: #fff; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; flex-wrap: wrap; gap: 10px; }
+        .container { max-width: 800px; margin: 20px auto; }
+        .card { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .card img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid #ddd; }
+        .info { flex-grow: 1; }
+        .btn { background: #007bff; color: white; padding: 8px 15px; text-decoration: none; border-radius: 4px; display: inline-block; border: none; cursor: pointer; font-size: 14px; }
+        .btn-green { background: #28a745; }
+        .btn-danger { background: #dc3545; padding: 3px 8px; font-size: 12px; }
+        .box { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        input, select { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 10px 0; }
+        ul { padding-right: 20px; margin: 5px 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>متجر التطبيقات (Sab Base Online)</h2>
+    <div id="user-status">جاري التحميل...</div>
+</header>
+
+<div class="container">
+
+    <!-- نموذج تسجيل الدخول بأي حساب -->
+    <div id="login-section" class="box" style="display: none;">
+        <h3>تسجيل الدخول (بأي بريد وكلمة مرور)</h3>
+        <input type="email" id="login-email" placeholder="البريد الإلكتروني (مثال: user@mail.com)">
+        <input type="password" id="login-pass" placeholder="كلمة المرور (أي كلمة مرور)">
+        <button class="btn" onclick="login()">دخول للمتجر</button>
+    </div>
+
+    <!-- قسم الإرشاد للأدمن -->
+    <div class="box" style="background: #e9ecef; font-size: 13px;">
+        <strong>ملاحظة للأدمن:</strong> لإضافة الألعاب أو التطبيقات (اسم اللعبة، رابط الصورة، رابط التحميل)، اذهب إلى لوحة تحكم موقع Supabase من هاتفك وفي جدول <code>apps</code> قم بإضافة البيانات لتظهر هنا فوراً.
+    </div>
+
+    <h2>التطبيقات والألعاب المتاحة:</h2>
+    <div id="apps-list">جاري تحميل التطبيقات من قاعدة البيانات السحابية...</div>
+
+</div>
+
+<script>
+    // بيانات مشروعك المدمجة مباشرة
+    const SUPABASE_URL = 'https://wzioszhtbymbtwwlrygm.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aW9zemh0YnltYnR3d2xyeWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5ODg0NzMsImV4cCI6MjEwNTU2NDQ3M30.c24svzMWslBnnNN5hbEcdyi4rgOhuuovVkA6JZa3FTA';
+
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // التحقق من حالة المستخدم المخزن محلياً على المتصفح
+    let currentUser = localStorage.getItem('sab_user');
+
+    function updateAuthUI() {
+        const statusDiv = document.getElementById('user-status');
+        const loginSection = document.getElementById('login-section');
+
+        if (currentUser) {
+            statusDiv.innerHTML = `مرحباً: <b>${currentUser}</b> | <button class="btn btn-danger" onclick="logout()">خروج</button>`;
+            loginSection.style.display = 'none';
+        } else {
+            statusDiv.innerHTML = `غير مسجل الدخول`;
+            loginSection.style.display = 'block';
+        }
+    }
+
+    function login() {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        
+        if (!email || !pass) {
+            alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور');
+            return;
+        }
+        
+        localStorage.setItem('sab_user', email);
+        currentUser = email;
+        updateAuthUI();
+        loadApps();
+    }
+
+    function logout() {
+        localStorage.removeItem('sab_user');
+        currentUser = null;
+        updateAuthUI();
+        loadApps();
+    }
+
+    // جلب التطبيقات والتقييمات من قاعدة البيانات
+    async function loadApps() {
+        const appsContainer = document.getElementById('apps-list');
+        appsContainer.innerHTML = 'جاري التحميل...';
+
+        let { data: apps, error } = await supabase.from('apps').select('*').order('id', { ascending: false });
+        
+        if (error) {
+            appsContainer.innerHTML = 'حدث خطأ أثناء تحميل التطبيقات: ' + error.message;
+            return;
+        }
+
+        if (!apps || apps.length === 0) {
+            appsContainer.innerHTML = '<p>لا توجد تطبيقات مضافة حالياً. اذهب إلى جدول apps في Supabase وأضف تطبيقك الأول!</p>';
+            return;
+        }
+
+        appsContainer.innerHTML = '';
+
+        for (let app of apps) {
+            // جلب التقييمات لكل تطبيق على حدة
+            let { data: reviews } = await supabase.from('reviews').select('*').eq('app_id', app.id);
+
+            let reviewsHtml = '';
+            if (reviews && reviews.length > 0) {
+                reviews.forEach(r => {
+                    reviewsHtml += `<li><b>${r.user_email}</b> (التقييم: ${r.rating}/5): ${r.comment}</li>`;
+                });
+            } else {
+                reviewsHtml = '<p style="font-size:12px; color:gray; margin:0;">لا توجد تقييمات حتى الآن. كن أول من يقيّم!</p>';
+            }
+
+            let reviewFormHtml = '';
+            if (currentUser) {
+                reviewFormHtml = `
+                    <div style="margin-top: 10px; background: #f9f9f9; padding: 10px; border-radius: 5px; border: 1px solid #eee;">
+                        <label style="font-size: 12px; display: block; margin-bottom: 3px;">أضف تقييمك:</label>
+                        <select id="rating-${app.id}">
+                            <option value="5">⭐⭐⭐⭐⭐ (5 - ممتاز)</option>
+                            <option value="4">⭐⭐⭐⭐ (4 - جيد جداً)</option>
+                            <option value="3">⭐⭐⭐ (3 - جيد)</option>
+                            <option value="2">⭐⭐ (2 - مقبول)</option>
+                            <option value="1">⭐ (1 - سيء)</option>
+                        </select>
+                        <input type="text" id="comment-${app.id}" placeholder="اكتب تعليقك هنا..." style="margin-top: 5px;">
+                        <button class="btn" style="margin-top: 5px; padding: 5px 10px; font-size: 13px;" onclick="addReview(${app.id})">إرسال التقييم</button>
+                    </div>
+                `;
+            } else {
+                reviewFormHtml = `<p style="font-size: 12px; color: #888; margin-top: 8px;">سجل دخولك بالأعلى لتتمكن من إضافة تقييم وتعليق.</p>`;
+            }
+
+            appsContainer.innerHTML += `
+                <div class="card">
+                    <img src="${app.image_url}" alt="صورة التطبيق" onerror="this.src='https://via.placeholder.com/80?text=App'">
+                    <div class="info">
+                        <h3 style="margin: 0 0 10px 0;">${app.name}</h3>
+                        <a href="${app.download_url}" class="btn btn-green" target="_blank">تحميل التطبيق / اللعبة</a>
+                        <hr>
+                        <h4 style="margin: 5px 0; font-size: 14px;">التقييمات والتعليقات:</h4>
+                        <ul style="padding-right: 15px; margin-bottom: 10px;">${reviewsHtml}</ul>
+                        ${reviewFormHtml}
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // إرسال تقييم جديد إلى قاعدة البيانات السحابية
+    async function addReview(appId) {
+        const rating = document.getElementById(`rating-${appId}`).value;
+        const comment = document.getElementById(`comment-${appId}`).value;
+
+        if (!comment.trim()) {
+            alert('الرجاء كتابة تعليق قبل الإرسال');
+            return;
+        }
+
+        const { error } = await supabase.from('reviews').insert([
+            { app_id: appId, user_email: currentUser, rating: parseInt(rating), comment: comment }
+        ]);
+
+        if (error) {
+            alert('خطأ في إرسال التقييم: ' + error.message);
+        } else {
+            alert('تم نشر تقييمك بنجاح!');
+            loadApps();
+        }
+    }
+
+    // تشغيل الدوال عند تحميل الصفحة لأول مرة
+    updateAuthUI();
+    loadApps();
+</script>
+
+</body>
+  </html>
 
