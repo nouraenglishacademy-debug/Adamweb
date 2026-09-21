@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر التطبيقات والألعاب - NOON STORE</title>
+    <title>متجر أدم - ADAM STORE</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -12,8 +12,8 @@
     <header class="bg-amber-400 shadow-md sticky top-0 z-50">
         <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center gap-4 flex-wrap">
             <div class="flex items-center gap-2">
-                <span class="text-2xl font-black tracking-wider text-gray-900 bg-white px-3 py-1 rounded-lg shadow-sm">NOON<span class="text-amber-500">.STORE</span></span>
-                <span class="text-xs font-semibold bg-gray-900 text-amber-400 px-2 py-1 rounded">متجر التطبيقات</span>
+                <span class="text-2xl font-black tracking-wider text-gray-900 bg-white px-3 py-1 rounded-lg shadow-sm">ADAM<span class="text-amber-500">.STORE</span></span>
+                <span class="text-xs font-semibold bg-gray-900 text-amber-400 px-2 py-1 rounded">متجر أدم للتطبيقات والألعاب</span>
             </div>
             <div id="header-user-area" class="flex items-center gap-3"></div>
         </div>
@@ -21,6 +21,7 @@
 
     <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
 
+        <!-- صندوق تسجيل الدخول -->
         <div id="login-box" class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 max-w-md mx-auto hidden">
             <h2 class="text-lg font-bold mb-4 text-gray-800 border-b pb-2">تسجيل الدخول للمتجر</h2>
             <div class="space-y-3">
@@ -36,6 +37,7 @@
             </div>
         </div>
 
+        <!-- لوحة تحكم الأدمن (كلمة المرور: 123456) -->
         <div id="admin-panel" class="bg-white p-6 rounded-2xl shadow-md border-2 border-amber-400 hidden">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">🛠️ لوحة تحكم الأدمن (إضافة لعبة أو تطبيق)</h2>
@@ -49,13 +51,15 @@
             <button onclick="addNewApp()" class="mt-4 w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold py-3 rounded-xl transition text-sm shadow-sm">نشر التطبيق فوراً في المتجر 🚀</button>
         </div>
 
+        <!-- زر فتح لوحة الأدمن الواضح -->
         <div id="admin-trigger-wrap" class="flex justify-end">
-            <button onclick="checkAdminPassword()" class="text-xs font-semibold bg-white hover:bg-gray-50 text-gray-600 px-4 py-2 rounded-xl border border-gray-300 shadow-sm transition flex items-center gap-1.5">⚙️ دخول لوحة الأدمن</button>
+            <button type="button" onclick="checkAdminPassword()" class="text-xs font-bold bg-gray-900 text-amber-400 hover:bg-gray-800 px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer">⚙️ دخول لوحة الأدمن</button>
         </div>
 
+        <!-- قسم عرض التطبيقات والألعاب -->
         <section>
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-black text-gray-800">🔥 أحدث الألعاب والتطبيقات</h2>
+                <h2 class="text-xl font-black text-gray-800">🔥 أحدث الألعاب والتطبيقات في متجر أدم</h2>
             </div>
             <div id="apps-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <p class="text-gray-500 col-span-full text-center py-10">جاري تحميل المتجر...</p>
@@ -83,21 +87,25 @@
                     <span class="text-xs font-bold text-gray-900 bg-white/80 px-3 py-1.5 rounded-lg shadow-xs">👤 ${currentUser}</span>
                     <button onclick="logoutAction()" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold px-3.5 py-1.5 rounded-lg transition">خروج</button>
                 `;
-                loginBox.classList.add('hidden');
+                if(loginBox) loginBox.classList.add('hidden');
             } else {
                 userArea.innerHTML = `
-                    <button onclick="document.getElementById('login-box').classList.toggle('hidden')" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">تسجيل الدخول</button>
+                    <button onclick="toggleLoginBox()" class="bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm">تسجيل الدخول</button>
                 `;
-                loginBox.classList.remove('hidden');
             }
 
             if (isAdminActive) {
-                adminPanel.classList.remove('hidden');
-                adminTrigger.classList.add('hidden');
+                if(adminPanel) adminPanel.classList.remove('hidden');
+                if(adminTrigger) adminTrigger.classList.add('hidden');
             } else {
-                adminPanel.classList.add('hidden');
-                adminTrigger.classList.remove('hidden');
+                if(adminPanel) adminPanel.classList.add('hidden');
+                if(adminTrigger) adminTrigger.classList.remove('hidden');
             }
+        }
+
+        function toggleLoginBox() {
+            const box = document.getElementById('login-box');
+            if(box) box.classList.toggle('hidden');
         }
 
         function loginAction() {
@@ -125,7 +133,7 @@
                 localStorage.setItem('store_admin', 'true');
                 isAdminActive = true;
                 updateLayout();
-                alert("مرحباً بك يا أدمن! تم تفعيل اللوحة بنجاح.");
+                alert("مرحباً بك يا أدم! تم تفعيل لوحة الأدمن بنجاح.");
             } else if (pass !== null) {
                 alert("كلمة المرور غير صحيحة!");
             }
@@ -143,7 +151,7 @@
             const download_url = document.getElementById('admin-download').value;
 
             if (!name || !image_url || !download_url) {
-                alert('الرجاء تعبئة حقول: (اسم اللعبة، رابط الصورة، رابط التحميل)');
+                alert('الرجاء تعبئة جميع حقول التطبيق (الاسم، الصورة، رابط التحميل)');
                 return;
             }
 
@@ -152,7 +160,7 @@
             if (error) {
                 alert('خطأ أثناء النشر: ' + error.message);
             } else {
-                alert('تم نشر التطبيق في المتجر بنجاح!');
+                alert('تم نشر التطبيق في متجر أدم بنجاح!');
                 document.getElementById('admin-name').value = '';
                 document.getElementById('admin-img').value = '';
                 document.getElementById('admin-download').value = '';
@@ -162,7 +170,8 @@
 
         async function loadStoreApps() {
             const grid = document.getElementById('apps-grid');
-            grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">جاري تحميل البيانات...</p>';
+            if(!grid) return;
+            grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">جاري تحميل التطبيقات...</p>';
 
             let { data: apps, error } = await supabase.from('apps').select('*').order('id', { ascending: false });
 
@@ -172,7 +181,7 @@
             }
 
             if (!apps || apps.length === 0) {
-                grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">لا توجد تطبيقات مضافة حالياً. استخدم لوحة الأدمن بالأعلى لإضافة أول تطبيق!</p>';
+                grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">لا توجد تطبيقات مضافة حالياً. افتح لوحة الأدمن بالأعلى وأضف أول تطبيق!</p>';
                 return;
             }
 
@@ -259,6 +268,7 @@
             }
         }
 
+        // تشغيل الواجهة عند تحميل الصفحة
         updateLayout();
         loadStoreApps();
     </script>
