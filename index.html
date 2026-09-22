@@ -8,6 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .app-card { transition: all 0.3s ease; }
+        .app-card:hover { transform: translateY(-4px); }
+    </style>
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans min-h-screen">
 
@@ -25,19 +29,15 @@
 
         <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
             
-            <!-- أدوات التصفية والبحث -->
+            <!-- شريط البحث الفوري والتصنيفات -->
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between">
-                <!-- شريط البحث -->
-                <div class="relative w-full md:w-80">
-                    <input type="text" id="search-input" oninput="filterApps()" placeholder="🔍 ابحث عن لعبة أو تطبيق..." class="w-full bg-gray-50 border border-gray-300 rounded-xl pr-4 pl-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                <div class="relative w-full md:w-2/3">
+                    <input type="text" id="search-input" oninput="filterApps()" placeholder="🔍 ابحث عن لعبة أو تطبيق..." class="w-full bg-gray-50 border border-gray-300 rounded-xl pr-4 pl-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
                 </div>
-
-                <!-- أزرار التصنيفات -->
-                <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-                    <button onclick="setCategory('all')" id="cat-all" class="cat-btn bg-amber-400 text-gray-900 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap shadow-sm">الكل 📱</button>
-                    <button onclick="setCategory('games')" id="cat-games" class="cat-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap">ألعاب 🎮</button>
-                    <button onclick="setCategory('apps')" id="cat-apps" class="cat-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap">تطبيقات 📲</button>
-                    <button onclick="setCategory('tools')" id="cat-tools" class="cat-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap">أدوات 🛠️</button>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <button onclick="toggleFavoritesFilter()" id="fav-filter-btn" class="w-full md:w-auto text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2.5 rounded-xl border border-gray-300 transition flex items-center justify-center gap-1">
+                        ❤️ المفضلة فقط
+                    </button>
                 </div>
             </div>
 
@@ -45,7 +45,7 @@
             <div id="admin-trigger-wrap" class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
                 <div>
                     <h3 class="font-bold text-sm text-gray-800">إدارة المتجر</h3>
-                    <p class="text-xs text-gray-500">خاص بصاحب المتجر لإضافة وتعديل التطبيقات</p>
+                    <p class="text-xs text-gray-500">خاص بصاحب المتجر لإضافة وتعديل التطبيقات والتعليقات</p>
                 </div>
                 <button type="button" onclick="checkAdminPassword()" class="text-xs font-bold bg-gray-900 text-amber-400 hover:bg-gray-800 px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer">⚙️ دخول لوحة الأدمن</button>
             </div>
@@ -62,7 +62,7 @@
         </main>
     </div>
 
-    <!-- ================= 2. صفحة تسجيل الدخول المنفصلة (نمط Google) ================= -->
+    <!-- ================= 2. صفحة تسجيل الدخول المنفصلة ================= -->
     <div id="login-page" class="hidden min-h-screen flex items-center justify-center p-4 bg-gray-100">
         <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-lg border border-gray-200 text-center space-y-6">
             <div class="space-y-2">
@@ -102,28 +102,21 @@
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex justify-between items-center flex-wrap gap-4">
                 <div>
                     <h1 class="text-2xl font-black text-gray-900 flex items-center gap-2">🛠️ لوحة تحكم إدارة متجر أدم</h1>
-                    <p class="text-xs text-gray-500 mt-1">إضافة، تعديل، وحذف التطبيقات والألعاب بكل سهولة</p>
+                    <p class="text-xs text-gray-500 mt-1">إضافة، تعديل، وحذف التطبيقات والتحكم بالتعليقات</p>
                 </div>
                 <button onclick="closeAdmin()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-md">
                     الخروج من لوحة التحكم ✕
                 </button>
             </div>
 
-            <!-- نموذج إضافة تطبيق جديد -->
+            <!-- نموذج إضافة / تعديل تطبيق -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 space-y-4">
-                <h2 class="text-lg font-bold text-gray-800 border-b pb-3 flex items-center gap-2">➕ إضافة تطبيق جديد للمتجر</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <h2 id="form-title" class="text-lg font-bold text-gray-800 border-b pb-3 flex items-center gap-2">➕ إضافة تطبيق جديد للمتجر</h2>
+                <input type="hidden" id="admin-edit-id" value="">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">اسم اللعبة أو التطبيق</label>
                         <input type="text" id="admin-name" placeholder="مثال: ببجي موبايل" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">التصنيف</label>
-                        <select id="admin-category" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400">
-                            <option value="games">🎮 ألعاب</option>
-                            <option value="apps">📲 تطبيقات</option>
-                            <option value="tools">🛠️ أدوات</option>
-                        </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">رابط الصورة (Image URL)</label>
@@ -134,15 +127,20 @@
                         <input type="url" id="admin-download" placeholder="https://..." class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
                     </div>
                 </div>
-                <button onclick="addNewApp()" class="w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-black py-3 rounded-xl transition text-sm shadow-md">
-                    نشر التطبيق فوراً في المتجر 🚀
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="saveApp()" id="save-app-btn" class="flex-1 bg-amber-400 hover:bg-amber-500 text-gray-900 font-black py-3 rounded-xl transition text-sm shadow-md">
+                        نشر التطبيق فوراً 🚀
+                    </button>
+                    <button onclick="resetAdminForm()" id="cancel-edit-btn" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold px-5 py-3 rounded-xl transition text-sm">
+                        إلغاء
+                    </button>
+                </div>
             </div>
 
             <!-- جدول التطبيقات المضافة -->
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 space-y-4">
                 <div class="flex justify-between items-center border-b pb-3">
-                    <h2 class="text-lg font-bold text-gray-800">📋 قائمة جميع التطبيقات المنشورة</h2>
+                    <h2 class="text-lg font-bold text-gray-800">📋 قائمة جميع التطبيقات والتعليقات</h2>
                     <button onclick="loadAdminTable()" class="text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">تحديث الجدول 🔄</button>
                 </div>
                 
@@ -152,14 +150,13 @@
                             <tr class="bg-gray-50 text-gray-600 border-b border-gray-200">
                                 <th class="p-3">الأيقونة</th>
                                 <th class="p-3">اسم التطبيق</th>
-                                <th class="p-3">التصنيف</th>
                                 <th class="p-3">رابط التحميل</th>
                                 <th class="p-3 text-center">إجراءات</th>
                             </tr>
                         </thead>
                         <tbody id="admin-table-body">
                             <tr>
-                                <td colspan="5" class="text-center py-6 text-gray-400">جاري تحميل البيانات...</td>
+                                <td colspan="4" class="text-center py-6 text-gray-400">جاري تحميل البيانات...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -179,9 +176,9 @@
         let currentUser = localStorage.getItem('store_user');
         let isAdminActive = localStorage.getItem('store_admin') === 'true';
         let allAppsData = [];
-        let activeCategory = 'all';
+        let favoritesList = JSON.parse(localStorage.getItem('store_favs') || '[]');
+        let showFavsOnly = false;
 
-        // التنقل بين الشاشات
         function showLoginPage() {
             document.getElementById('main-store-page').classList.add('hidden');
             document.getElementById('admin-page').classList.add('hidden');
@@ -224,17 +221,13 @@
             }
         }
 
-        // فحص البريد والكلمة
         function validateCredentials(email, password) {
             const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailPattern.test(email)) {
-                return { valid: false, message: 'الرجاء إدخال بريد إلكتروني صحيح (مثال: name@example.com)' };
+                return { valid: false, message: 'الرجاء إدخال بريد إلكتروني صحيح' };
             }
             if (password.length < 6) {
                 return { valid: false, message: 'كلمة المرور يجب أن تكون 6 خانات أو أكثر' };
-            }
-            if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
-                return { valid: false, message: 'كلمة المرور يجب أن تحتوي على حروف وأرقام معاً' };
             }
             return { valid: true };
         }
@@ -271,7 +264,7 @@
 
         function checkAdminPassword() {
             const pass = prompt("أدخل كلمة المرور الخاصة بالأدمن:");
-            if (pass === "adam67") {
+            if (pass === "123456") {
                 localStorage.setItem('store_admin', 'true');
                 isAdminActive = true;
                 showAdminPage();
@@ -286,42 +279,98 @@
             showStorePage();
         }
 
-        async function addNewApp() {
+        function toggleFavorite(appId) {
+            if (favoritesList.includes(appId)) {
+                favoritesList = favoritesList.filter(id => id !== appId);
+            } else {
+                favoritesList.push(appId);
+            }
+            localStorage.setItem('store_favs', JSON.stringify(favoritesList));
+            filterApps();
+        }
+
+        function toggleFavoritesFilter() {
+            showFavsOnly = !showFavsOnly;
+            const btn = document.getElementById('fav-filter-btn');
+            if (showFavsOnly) {
+                btn.classList.replace('bg-gray-100', 'bg-red-500');
+                btn.classList.replace('text-gray-800', 'text-white');
+            } else {
+                btn.classList.replace('bg-red-500', 'bg-gray-100');
+                btn.classList.replace('text-white', 'text-gray-800');
+            }
+            filterApps();
+        }
+
+        function shareApp(appName, url) {
+            if (navigator.share) {
+                navigator.share({
+                    title: appName,
+                    text: `حمل تطبيق ${appName} الآن من متجر أدم!`,
+                    url: url
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(url);
+                alert('تم نسخ رابط التحميل لمشاركته!');
+            }
+        }
+
+        async function saveApp() {
+            const editId = document.getElementById('admin-edit-id').value;
             const name = document.getElementById('admin-name').value.trim();
-            const category = document.getElementById('admin-category').value;
             let image_url = document.getElementById('admin-img').value.trim();
             let download_url = document.getElementById('admin-download').value.trim();
 
             if (!name || !image_url || !download_url) {
-                alert('الرجاء تعبئة جميع حقول التطبيق');
+                alert('الرجاء تعبئة جميع الحقول');
                 return;
             }
 
-            if (!download_url.startsWith('http://') && !download_url.startsWith('https://')) {
-                download_url = 'https://' + download_url;
-            }
-            if (!image_url.startsWith('http://') && !image_url.startsWith('https://')) {
-                image_url = 'https://' + image_url;
-            }
+            if (!download_url.startsWith('http://') && !download_url.startsWith('https://')) download_url = 'https://' + download_url;
+            if (!image_url.startsWith('http://') && !image_url.startsWith('https://')) image_url = 'https://' + image_url;
 
-            const { error } = await supabaseClient.from('apps').insert([{ name, category, image_url, download_url }]);
+            let error;
+            if (editId) {
+                const res = await supabaseClient.from('apps').update({ name, image_url, download_url }).eq('id', editId);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('apps').insert([{ name, image_url, download_url }]);
+                error = res.error;
+            }
 
             if (error) {
-                alert('خطأ أثناء النشر: ' + error.message);
+                alert('خطأ أثناء حفظ التطبيق: ' + error.message);
             } else {
-                alert('تم نشر التطبيق في المتجر بنجاح!');
-                document.getElementById('admin-name').value = '';
-                document.getElementById('admin-img').value = '';
-                document.getElementById('admin-download').value = '';
+                alert(editId ? 'تم تعديل التطبيق بنجاح!' : 'تم نشر التطبيق بنجاح!');
+                resetAdminForm();
                 loadAdminTable();
             }
+        }
+
+        function editApp(app) {
+            document.getElementById('admin-edit-id').value = app.id;
+            document.getElementById('admin-name').value = app.name;
+            document.getElementById('admin-img').value = app.image_url;
+            document.getElementById('admin-download').value = app.download_url;
+            document.getElementById('form-title').innerText = '✏️ تعديل بيانات التطبيق';
+            document.getElementById('save-app-btn').innerText = 'حفظ التعديلات 💾';
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+        }
+
+        function resetAdminForm() {
+            document.getElementById('admin-edit-id').value = '';
+            document.getElementById('admin-name').value = '';
+            document.getElementById('admin-img').value = '';
+            document.getElementById('admin-download').value = '';
+            document.getElementById('form-title').innerText = '➕ إضافة تطبيق جديد للمتجر';
+            document.getElementById('save-app-btn').innerText = 'نشر التطبيق فوراً 🚀';
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
         }
 
         async function deleteApp(appId, appName) {
             if (!confirm(`هل أنت تأكد من إزالة "${appName}" من المتجر نهائياً؟`)) return;
 
             const { error } = await supabaseClient.from('apps').delete().eq('id', appId);
-
             if (error) {
                 alert('خطأ أثناء الحذف: ' + error.message);
             } else {
@@ -330,56 +379,66 @@
             }
         }
 
+        async function deleteReview(reviewId) {
+            if (!confirm('هل تريد حذف هذا التعليق؟')) return;
+            const { error } = await supabaseClient.from('reviews').delete().eq('id', reviewId);
+            if (error) alert('خطأ في الحذف: ' + error.message);
+            else loadAdminTable();
+        }
+
         async function loadAdminTable() {
             const tableBody = document.getElementById('admin-table-body');
             if(!tableBody) return;
 
-            tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-400">جاري تحميل التطبيقات...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-gray-400">جاري تحميل التطبيقات...</td></tr>';
 
             let { data: apps, error } = await supabaseClient.from('apps').select('*').order('id', { ascending: false });
 
             if (error) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">خطأ: ${error.message}</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-red-500">خطأ: ${error.message}</td></tr>`;
                 return;
             }
 
             if (!apps || apps.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-500">لا توجد تطبيقات مضافة بعد. أضف تطبيقك الأول الآن!</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-gray-500">لا توجد تطبيقات مضافة.</td></tr>';
                 return;
             }
 
             tableBody.innerHTML = '';
 
-            apps.forEach(app => {
-                let catLabel = app.category === 'games' ? '🎮 ألعاب' : app.category === 'tools' ? '🛠️ أدوات' : '📲 تطبيقات';
+            for (let app of apps) {
+                let { data: reviews } = await supabaseClient.from('reviews').select('*').eq('app_id', app.id);
+                let reviewsHtml = '';
+                if(reviews && reviews.length > 0) {
+                    reviews.forEach(r => {
+                        reviewsHtml += `<div class="flex justify-between items-center text-xs bg-gray-50 p-1.5 my-1 rounded border">
+                            <span><b>${r.user_email}:</b> ${r.comment} (${r.rating}★)</span>
+                            <button onclick="deleteReview(${r.id})" class="text-red-500 hover:underline font-bold mr-2">حذف</button>
+                        </div>`;
+                    });
+                } else {
+                    reviewsHtml = '<span class="text-xs text-gray-400">لا توجد تعليقات</span>';
+                }
+
                 tableBody.innerHTML += `
                     <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
                         <td class="p-3">
                             <img src="${app.image_url}" class="w-10 h-10 rounded-lg object-cover border" onerror="this.src='https://via.placeholder.com/40'">
                         </td>
-                        <td class="p-3 font-bold text-gray-800">${app.name}</td>
-                        <td class="p-3 font-semibold text-xs text-gray-600">${catLabel}</td>
+                        <td class="p-3 font-bold text-gray-800">
+                            ${app.name}
+                            <div class="mt-1">${reviewsHtml}</div>
+                        </td>
                         <td class="p-3">
                             <a href="${app.download_url}" target="_blank" class="text-xs text-blue-600 underline truncate block max-w-xs">${app.download_url}</a>
                         </td>
-                        <td class="p-3 text-center">
-                            <button onclick="deleteApp(${app.id}, '${app.name}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-3 py-1.5 rounded-lg border border-red-200 transition">
-                                🗑️ حذف
-                            </button>
+                        <td class="p-3 text-center space-x-1 space-x-reverse">
+                            <button onclick='editApp(${JSON.stringify(app)})' class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-xs px-3 py-1.5 rounded-lg transition">✏️ تعديل</button>
+                            <button onclick="deleteApp(${app.id}, '${app.name}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-3 py-1.5 rounded-lg transition">🗑️ حذف</button>
                         </td>
                     </tr>
                 `;
-            });
-        }
-
-        // إدارة البحث والتصنيفات
-        function setCategory(cat) {
-            activeCategory = cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.className = 'cat-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap';
-            });
-            document.getElementById(`cat-${cat}`).className = 'cat-btn bg-amber-400 text-gray-900 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap shadow-sm';
-            filterApps();
+            }
         }
 
         function filterApps() {
@@ -387,8 +446,8 @@
             
             let filtered = allAppsData.filter(app => {
                 const matchesSearch = app.name.toLowerCase().includes(query);
-                const matchesCat = (activeCategory === 'all') || (app.category === activeCategory);
-                return matchesSearch && matchesCat;
+                const matchesFav = showFavsOnly ? favoritesList.includes(app.id) : true;
+                return matchesSearch && matchesFav;
             });
 
             renderStoreGrid(filtered);
@@ -409,12 +468,17 @@
             filterApps();
         }
 
+        function toggleCommentsView(appId) {
+            const el = document.getElementById(`comments-section-${appId}`);
+            if(el) el.classList.toggle('hidden');
+        }
+
         async function renderStoreGrid(apps) {
             const grid = document.getElementById('apps-grid');
             if(!grid) return;
 
             if (!apps || apps.length === 0) {
-                grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">لا توجد تطبيقات تطابق عملية البحث أو التصنيف المختارات.</p>';
+                grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">لا توجد ألعاب أو تطبيقات مطابقة.</p>';
                 return;
             }
 
@@ -423,8 +487,15 @@
             for (let app of apps) {
                 let { data: reviews } = await supabaseClient.from('reviews').select('*').eq('app_id', app.id);
 
+                let avgRating = 0;
+                let reviewsCount = reviews ? reviews.length : 0;
+                if (reviewsCount > 0) {
+                    let total = reviews.reduce((acc, curr) => acc + curr.rating, 0);
+                    avgRating = (total / reviewsCount).toFixed(1);
+                }
+
                 let reviewsListHtml = '';
-                if (reviews && reviews.length > 0) {
+                if (reviewsCount > 0) {
                     reviews.forEach(r => {
                         reviewsListHtml += `
                             <div class="bg-gray-50 p-2 rounded-lg border border-gray-200 text-xs space-y-0.5">
@@ -458,7 +529,7 @@
                         </div>
                     `;
                 } else {
-                    reviewInputBox = `<p class="text-gray-400 text-xs italic mt-2">سجل دخولك بالأعلى لإضافة تقييم.</p>`;
+                    reviewInputBox = `<p class="text-gray-400 text-xs italic mt-2">سجل دخولك لإضافة تقييم.</p>`;
                 }
 
                 let cleanDownloadUrl = app.download_url;
@@ -466,19 +537,39 @@
                     cleanDownloadUrl = 'https://' + cleanDownloadUrl;
                 }
 
+                const isFav = favoritesList.includes(app.id);
+
                 grid.innerHTML += `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition">
-                        <div class="p-4 flex gap-4 items-center">
-                            <img src="${app.image_url}" alt="أيقونة" class="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-xs shrink-0" onerror="this.src='https://via.placeholder.com/80?text=App'">
-                            <div class="flex-1 min-w-0">
-                                <h3 class="font-black text-gray-900 text-base truncate mb-1">${app.name}</h3>
-                                <a href="${cleanDownloadUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-black text-xs py-2 px-3 rounded-xl transition shadow-xs">تحميل التطبيق 📥</a>
+                    <div class="app-card bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-between">
+                        <div class="p-4 space-y-3">
+                            <div class="flex gap-4 items-center">
+                                <img src="${app.image_url}" alt="أيقونة" class="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-xs shrink-0" onerror="this.src='https://via.placeholder.com/80?text=App'">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-start gap-1">
+                                        <h3 class="font-black text-gray-900 text-base truncate mb-1">${app.name}</h3>
+                                        <button onclick="toggleFavorite(${app.id})" class="text-lg leading-none focus:outline-none">${isFav ? '❤️' : '🤍'}</button>
+                                    </div>
+                                    <div class="flex items-center gap-1 text-xs text-amber-500 font-bold mb-2">
+                                        <span>⭐ ${avgRating > 0 ? avgRating : 'جديد'}</span>
+                                        <span class="text-gray-400 font-normal">(${reviewsCount} تقييم)</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <a href="${cleanDownloadUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 inline-flex items-center justify-center bg-amber-400 hover:bg-amber-500 text-gray-900 font-black text-xs py-2 px-3 rounded-xl transition shadow-xs">تحميل 📥</a>
+                                        <button onclick="shareApp('${app.name}', '${cleanDownloadUrl}')" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-xl text-xs font-bold transition">🔗</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+
                         <div class="bg-gray-50/50 p-4 border-t border-gray-100 space-y-2">
-                            <span class="text-xs font-bold text-gray-700 block">التقييمات والتعليقات:</span>
-                            <div class="space-y-1.5 max-h-28 overflow-y-auto pr-1">${reviewsListHtml}</div>
-                            ${reviewInputBox}
+                            <button onclick="toggleCommentsView(${app.id})" class="w-full text-xs font-bold text-gray-700 flex justify-between items-center hover:text-amber-600 transition">
+                                <span>💬 التقييمات والملاحظات</span>
+                                <span>▼</span>
+                            </button>
+                            <div id="comments-section-${app.id}" class="hidden space-y-2 pt-2">
+                                <div class="space-y-1.5 max-h-28 overflow-y-auto pr-1">${reviewsListHtml}</div>
+                                ${reviewInputBox}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -506,7 +597,6 @@
             }
         }
 
-        // تشغيل الواجهة
         updateLayout();
     </script>
 </body>
