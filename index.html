@@ -17,58 +17,60 @@
             <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center gap-4 flex-wrap">
                 <div class="flex items-center gap-2">
                     <span class="text-2xl font-black tracking-wider text-gray-900 bg-white px-3 py-1 rounded-lg shadow-sm">ADAM<span class="text-amber-500">.STORE</span></span>
-                    <span class="text-xs font-semibold bg-gray-900 text-amber-400 px-2 py-1 rounded">متجر أدم للتطبيقات والألعاب</span>
+                    <span class="text-xs font-semibold bg-gray-900 text-amber-400 px-2 py-1 rounded hidden sm:inline-block">متجر أدم للتطبيقات والألعاب</span>
                 </div>
                 <div id="header-user-area" class="flex items-center gap-3"></div>
             </div>
         </header>
 
         <main class="max-w-6xl mx-auto px-4 py-6 space-y-6">
+            
+            <!-- أدوات التصفية والبحث -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <!-- شريط البحث -->
+                <div class="relative w-full md:w-80">
+                    <input type="text" id="search-input" oninput="filterApps()" placeholder="🔍 ابحث عن لعبة أو تطبيق..." class="w-full bg-gray-50 border border-gray-300 rounded-xl pr-4 pl-10 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
 
-            <!-- لوحة تحكم الأدمن -->
-            <div id="admin-panel" class="bg-white p-6 rounded-2xl shadow-md border-2 border-amber-400 hidden">
-                <div class="flex justify-between items-center mb-4 border-b pb-3">
-                    <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">🛠️ لوحة تحكم الأدمن (إضافة لعبة أو تطبيق)</h2>
-                    <button onclick="closeAdmin()" class="text-xs text-red-500 font-bold hover:bg-red-50 px-3 py-1.5 rounded-lg transition">إغلاق اللوحة ✕</button>
+                <!-- أزرار التصنيفات -->
+                <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+                    <button onclick="setCategory('all')" id="cat-all" class="cat-btn bg-amber-400 text-gray-900 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap shadow-sm">الكل 📱</button>
+                    <button onclick="setCategory('games')" id="cat-games" class="cat-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap">ألعاب 🎮</button>
+                    <button onclick="setCategory('apps')" id="cat-apps" class="cat-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap">تطبيقات 📲</button>
+                    <button onclick="setCategory('tools')" id="cat-tools" class="cat-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap">أدوات 🛠️</button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <input type="text" id="admin-name" placeholder="اسم اللعبة أو التطبيق" class="bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    <input type="url" id="admin-img" placeholder="رابط الصورة (Image URL)" class="bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                    <input type="url" id="admin-download" placeholder="رابط التحميل المباشر" class="bg-gray-50 border border-gray-300 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
-                </div>
-                <button onclick="addNewApp()" class="mt-4 w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold py-3 rounded-xl transition text-sm shadow-sm">نشر التطبيق فوراً في المتجر 🚀</button>
             </div>
 
             <!-- زر فتح لوحة الأدمن -->
-            <div id="admin-trigger-wrap" class="flex justify-end">
+            <div id="admin-trigger-wrap" class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
+                <div>
+                    <h3 class="font-bold text-sm text-gray-800">إدارة المتجر</h3>
+                    <p class="text-xs text-gray-500">خاص بصاحب المتجر لإضافة وتعديل التطبيقات</p>
+                </div>
                 <button type="button" onclick="checkAdminPassword()" class="text-xs font-bold bg-gray-900 text-amber-400 hover:bg-gray-800 px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer">⚙️ دخول لوحة الأدمن</button>
             </div>
 
             <!-- قسم عرض التطبيقات والألعاب -->
             <section>
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-black text-gray-800">🔥 أحدث الألعاب والتطبيقات في متجر أدم</h2>
+                    <h2 class="text-xl font-black text-gray-800">🔥 أحدث الألعاب والتطبيقات</h2>
                 </div>
                 <div id="apps-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <p class="text-gray-500 col-span-full text-center py-10">جاري تحميل المتجر...</p>
                 </div>
             </section>
-
         </main>
     </div>
 
     <!-- ================= 2. صفحة تسجيل الدخول المنفصلة (نمط Google) ================= -->
     <div id="login-page" class="hidden min-h-screen flex items-center justify-center p-4 bg-gray-100">
         <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-lg border border-gray-200 text-center space-y-6">
-            
-            <!-- الشعار -->
             <div class="space-y-2">
                 <span class="text-3xl font-black tracking-wider text-gray-900 bg-amber-400 px-4 py-1.5 rounded-2xl shadow-sm inline-block">ADAM<span class="text-white">.STORE</span></span>
                 <h1 class="text-xl font-extrabold text-gray-800 pt-2">تسجيل الدخول</h1>
                 <p class="text-xs text-gray-500">أدخل بيانات الحساب للمتابعة في المتجر</p>
             </div>
 
-            <!-- النموذج -->
             <div class="space-y-4 text-right">
                 <div>
                     <label class="block text-xs font-bold text-gray-700 mb-1">البريد الإلكتروني</label>
@@ -87,14 +89,87 @@
                 </button>
             </div>
 
-            <!-- العودة للمتجر -->
             <div class="border-t pt-4">
                 <button onclick="showStorePage()" class="text-xs text-gray-500 hover:text-gray-800 font-bold transition">العودة للمتجر بدون تسجيل ➔</button>
             </div>
         </div>
     </div>
 
-    <!-- ================= 3. جافاسكريبت الموحد ================= -->
+    <!-- ================= 3. صفحة لوحة التحكم الكاملة للأدمن ================= -->
+    <div id="admin-page" class="hidden min-h-screen bg-gray-100 p-4 md:p-8">
+        <div class="max-w-6xl mx-auto space-y-6">
+            
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <h1 class="text-2xl font-black text-gray-900 flex items-center gap-2">🛠️ لوحة تحكم إدارة متجر أدم</h1>
+                    <p class="text-xs text-gray-500 mt-1">إضافة، تعديل، وحذف التطبيقات والألعاب بكل سهولة</p>
+                </div>
+                <button onclick="closeAdmin()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow-md">
+                    الخروج من لوحة التحكم ✕
+                </button>
+            </div>
+
+            <!-- نموذج إضافة تطبيق جديد -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 space-y-4">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-3 flex items-center gap-2">➕ إضافة تطبيق جديد للمتجر</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">اسم اللعبة أو التطبيق</label>
+                        <input type="text" id="admin-name" placeholder="مثال: ببجي موبايل" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">التصنيف</label>
+                        <select id="admin-category" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-400">
+                            <option value="games">🎮 ألعاب</option>
+                            <option value="apps">📲 تطبيقات</option>
+                            <option value="tools">🛠️ أدوات</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">رابط الصورة (Image URL)</label>
+                        <input type="url" id="admin-img" placeholder="https://..." class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">رابط التحميل المباشر</label>
+                        <input type="url" id="admin-download" placeholder="https://..." class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    </div>
+                </div>
+                <button onclick="addNewApp()" class="w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-black py-3 rounded-xl transition text-sm shadow-md">
+                    نشر التطبيق فوراً في المتجر 🚀
+                </button>
+            </div>
+
+            <!-- جدول التطبيقات المضافة -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-200 space-y-4">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h2 class="text-lg font-bold text-gray-800">📋 قائمة جميع التطبيقات المنشورة</h2>
+                    <button onclick="loadAdminTable()" class="text-xs font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition">تحديث الجدول 🔄</button>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600 border-b border-gray-200">
+                                <th class="p-3">الأيقونة</th>
+                                <th class="p-3">اسم التطبيق</th>
+                                <th class="p-3">التصنيف</th>
+                                <th class="p-3">رابط التحميل</th>
+                                <th class="p-3 text-center">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-table-body">
+                            <tr>
+                                <td colspan="5" class="text-center py-6 text-gray-400">جاري تحميل البيانات...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= 4. جافاسكريبت الموحد ================= -->
     <script>
         const SUPABASE_URL = 'https://wzioszhtbymbtwwlrygm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aW9zemh0YnltYnR3d2xyeWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5ODg0NzMsImV4cCI6MjEwNTU2NDQ3M30.c24svzMWslBnnNN5hbEcdyi4rgOhuuovVkA6JZa3FTA';
@@ -103,23 +178,33 @@
 
         let currentUser = localStorage.getItem('store_user');
         let isAdminActive = localStorage.getItem('store_admin') === 'true';
+        let allAppsData = [];
+        let activeCategory = 'all';
 
-        // التنقل بين الصفحات
+        // التنقل بين الشاشات
         function showLoginPage() {
             document.getElementById('main-store-page').classList.add('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
             document.getElementById('login-page').classList.remove('hidden');
             document.getElementById('login-error-msg').classList.add('hidden');
         }
 
         function showStorePage() {
             document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('admin-page').classList.add('hidden');
             document.getElementById('main-store-page').classList.remove('hidden');
+            loadStoreApps();
+        }
+
+        function showAdminPage() {
+            document.getElementById('main-store-page').classList.add('hidden');
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('admin-page').classList.remove('hidden');
+            loadAdminTable();
         }
 
         function updateLayout() {
             const userArea = document.getElementById('header-user-area');
-            const adminPanel = document.getElementById('admin-panel');
-            const adminTrigger = document.getElementById('admin-trigger-wrap');
 
             if (currentUser) {
                 userArea.innerHTML = `
@@ -133,17 +218,13 @@
             }
 
             if (isAdminActive) {
-                if(adminPanel) adminPanel.classList.remove('hidden');
-                if(adminTrigger) adminTrigger.classList.add('hidden');
+                showAdminPage();
             } else {
-                if(adminPanel) adminPanel.classList.add('hidden');
-                if(adminTrigger) adminTrigger.classList.remove('hidden');
+                showStorePage();
             }
-
-            loadStoreApps();
         }
 
-        // فحص وتأكيد المدخلات
+        // فحص البريد والكلمة
         function validateCredentials(email, password) {
             const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailPattern.test(email)) {
@@ -193,8 +274,7 @@
             if (pass === "123456") {
                 localStorage.setItem('store_admin', 'true');
                 isAdminActive = true;
-                updateLayout();
-                alert("مرحباً بك يا أدم! تم تفعيل لوحة الأدمن بنجاح.");
+                showAdminPage();
             } else if (pass !== null) {
                 alert("كلمة المرور غير صحيحة!");
             }
@@ -203,16 +283,17 @@
         function closeAdmin() {
             localStorage.removeItem('store_admin');
             isAdminActive = false;
-            updateLayout();
+            showStorePage();
         }
 
         async function addNewApp() {
             const name = document.getElementById('admin-name').value.trim();
+            const category = document.getElementById('admin-category').value;
             let image_url = document.getElementById('admin-img').value.trim();
             let download_url = document.getElementById('admin-download').value.trim();
 
             if (!name || !image_url || !download_url) {
-                alert('الرجاء تعبئة جميع حقول التطبيق (الاسم، الصورة، رابط التحميل)');
+                alert('الرجاء تعبئة جميع حقول التطبيق');
                 return;
             }
 
@@ -223,16 +304,16 @@
                 image_url = 'https://' + image_url;
             }
 
-            const { error } = await supabaseClient.from('apps').insert([{ name, image_url, download_url }]);
+            const { error } = await supabaseClient.from('apps').insert([{ name, category, image_url, download_url }]);
 
             if (error) {
                 alert('خطأ أثناء النشر: ' + error.message);
             } else {
-                alert('تم نشر التطبيق في متجر أدم بنجاح!');
+                alert('تم نشر التطبيق في المتجر بنجاح!');
                 document.getElementById('admin-name').value = '';
                 document.getElementById('admin-img').value = '';
                 document.getElementById('admin-download').value = '';
-                loadStoreApps();
+                loadAdminTable();
             }
         }
 
@@ -245,8 +326,72 @@
                 alert('خطأ أثناء الحذف: ' + error.message);
             } else {
                 alert('تم حذف التطبيق بنجاح!');
-                loadStoreApps();
+                loadAdminTable();
             }
+        }
+
+        async function loadAdminTable() {
+            const tableBody = document.getElementById('admin-table-body');
+            if(!tableBody) return;
+
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-400">جاري تحميل التطبيقات...</td></tr>';
+
+            let { data: apps, error } = await supabaseClient.from('apps').select('*').order('id', { ascending: false });
+
+            if (error) {
+                tableBody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-red-500">خطأ: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!apps || apps.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-gray-500">لا توجد تطبيقات مضافة بعد. أضف تطبيقك الأول الآن!</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = '';
+
+            apps.forEach(app => {
+                let catLabel = app.category === 'games' ? '🎮 ألعاب' : app.category === 'tools' ? '🛠️ أدوات' : '📲 تطبيقات';
+                tableBody.innerHTML += `
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                        <td class="p-3">
+                            <img src="${app.image_url}" class="w-10 h-10 rounded-lg object-cover border" onerror="this.src='https://via.placeholder.com/40'">
+                        </td>
+                        <td class="p-3 font-bold text-gray-800">${app.name}</td>
+                        <td class="p-3 font-semibold text-xs text-gray-600">${catLabel}</td>
+                        <td class="p-3">
+                            <a href="${app.download_url}" target="_blank" class="text-xs text-blue-600 underline truncate block max-w-xs">${app.download_url}</a>
+                        </td>
+                        <td class="p-3 text-center">
+                            <button onclick="deleteApp(${app.id}, '${app.name}')" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-3 py-1.5 rounded-lg border border-red-200 transition">
+                                🗑️ حذف
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // إدارة البحث والتصنيفات
+        function setCategory(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.className = 'cat-btn bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap';
+            });
+            document.getElementById(`cat-${cat}`).className = 'cat-btn bg-amber-400 text-gray-900 font-bold text-xs px-4 py-2 rounded-xl transition whitespace-nowrap shadow-sm';
+            filterApps();
+        }
+
+        function filterApps() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            
+            let filtered = allAppsData.filter(app => {
+                const matchesSearch = app.name.toLowerCase().includes(query);
+                const matchesCat = (activeCategory === 'all') || (app.category === activeCategory);
+                return matchesSearch && matchesCat;
+            });
+
+            renderStoreGrid(filtered);
         }
 
         async function loadStoreApps() {
@@ -260,8 +405,16 @@
                 return;
             }
 
+            allAppsData = apps || [];
+            filterApps();
+        }
+
+        async function renderStoreGrid(apps) {
+            const grid = document.getElementById('apps-grid');
+            if(!grid) return;
+
             if (!apps || apps.length === 0) {
-                grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">لا توجد تطبيقات مضافة حالياً. افتح لوحة الأدمن بالأعلى وأضف أول تطبيق!</p>';
+                grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">لا توجد تطبيقات تطابق عملية البحث أو التصنيف المختارات.</p>';
                 return;
             }
 
@@ -313,15 +466,6 @@
                     cleanDownloadUrl = 'https://' + cleanDownloadUrl;
                 }
 
-                let deleteButtonHtml = '';
-                if (isAdminActive) {
-                    deleteButtonHtml = `
-                        <button onclick="deleteApp(${app.id}, '${app.name}')" class="mt-2 w-full bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs py-1.5 rounded-lg border border-red-200 transition flex items-center justify-center gap-1">
-                            🗑️ مسح التطبيق
-                        </button>
-                    `;
-                }
-
                 grid.innerHTML += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition">
                         <div class="p-4 flex gap-4 items-center">
@@ -329,7 +473,6 @@
                             <div class="flex-1 min-w-0">
                                 <h3 class="font-black text-gray-900 text-base truncate mb-1">${app.name}</h3>
                                 <a href="${cleanDownloadUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-black text-xs py-2 px-3 rounded-xl transition shadow-xs">تحميل التطبيق 📥</a>
-                                ${deleteButtonHtml}
                             </div>
                         </div>
                         <div class="bg-gray-50/50 p-4 border-t border-gray-100 space-y-2">
@@ -363,7 +506,7 @@
             }
         }
 
-        // بداية التشغيل
+        // تشغيل الواجهة
         updateLayout();
     </script>
 </body>
