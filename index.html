@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر أدم - ADAM STORE</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- استخدام Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- مكتبة Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans min-h-screen">
@@ -37,7 +39,7 @@
             </div>
         </div>
 
-        <!-- لوحة تحكم الأدمن (كلمة المرور: 123456) -->
+        <!-- لوحة تحكم الأدمن -->
         <div id="admin-panel" class="bg-white p-6 rounded-2xl shadow-md border-2 border-amber-400 hidden">
             <div class="flex justify-between items-center mb-4 border-b pb-3">
                 <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">🛠️ لوحة تحكم الأدمن (إضافة لعبة أو تطبيق)</h2>
@@ -51,7 +53,7 @@
             <button onclick="addNewApp()" class="mt-4 w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold py-3 rounded-xl transition text-sm shadow-sm">نشر التطبيق فوراً في المتجر 🚀</button>
         </div>
 
-        <!-- زر فتح لوحة الأدمن الواضح -->
+        <!-- زر فتح لوحة الأدمن -->
         <div id="admin-trigger-wrap" class="flex justify-end">
             <button type="button" onclick="checkAdminPassword()" class="text-xs font-bold bg-gray-900 text-amber-400 hover:bg-gray-800 px-5 py-2.5 rounded-xl shadow-md transition flex items-center gap-2 cursor-pointer">⚙️ دخول لوحة الأدمن</button>
         </div>
@@ -71,7 +73,9 @@
     <script>
         const SUPABASE_URL = 'https://wzioszhtbymbtwwlrygm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aW9zemh0YnltYnR3d2xyeWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5ODg0NzMsImV4cCI6MjEwNTU2NDQ3M30.c24svzMWslBnnNN5hbEcdyi4rgOhuuovVkA6JZa3FTA';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // إصلاح تضارب الأسماء بإنشاء العميل تحت اسم supabaseClient
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = localStorage.getItem('store_user');
         let isAdminActive = localStorage.getItem('store_admin') === 'true';
@@ -155,7 +159,7 @@
                 return;
             }
 
-            const { error } = await supabase.from('apps').insert([{ name, image_url, download_url }]);
+            const { error } = await supabaseClient.from('apps').insert([{ name, image_url, download_url }]);
 
             if (error) {
                 alert('خطأ أثناء النشر: ' + error.message);
@@ -173,7 +177,7 @@
             if(!grid) return;
             grid.innerHTML = '<p class="text-gray-500 col-span-full text-center py-10">جاري تحميل التطبيقات...</p>';
 
-            let { data: apps, error } = await supabase.from('apps').select('*').order('id', { ascending: false });
+            let { data: apps, error } = await supabaseClient.from('apps').select('*').order('id', { ascending: false });
 
             if (error) {
                 grid.innerHTML = `<p class="text-red-500 col-span-full text-center">خطأ في الاتصال بقاعدة البيانات: ${error.message}</p>`;
@@ -188,7 +192,7 @@
             grid.innerHTML = '';
 
             for (let app of apps) {
-                let { data: reviews } = await supabase.from('reviews').select('*').eq('app_id', app.id);
+                let { data: reviews } = await supabaseClient.from('reviews').select('*').eq('app_id', app.id);
 
                 let reviewsListHtml = '';
                 if (reviews && reviews.length > 0) {
@@ -256,7 +260,7 @@
                 return;
             }
 
-            const { error } = await supabase.from('reviews').insert([
+            const { error } = await supabaseClient.from('reviews').insert([
                 { app_id: appId, user_email: currentUser, rating: parseInt(rating), comment: comment }
             ]);
 
@@ -274,3 +278,4 @@
     </script>
 </body>
 </html>
+
