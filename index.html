@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر أدم - ADAM STORE</title>
-    <!-- استخدام Tailwind CSS v3 -->
+    <!-- Tailwind CSS v3 -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- مكتبة Supabase -->
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans min-h-screen">
@@ -74,7 +74,6 @@
         const SUPABASE_URL = 'https://wzioszhtbymbtwwlrygm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6aW9zemh0YnltYnR3d2xyeWdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5ODg0NzMsImV4cCI6MjEwNTU2NDQ3M30.c24svzMWslBnnNN5hbEcdyi4rgOhuuovVkA6JZa3FTA';
         
-        // إصلاح تضارب الأسماء بإنشاء العميل تحت اسم supabaseClient
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = localStorage.getItem('store_user');
@@ -150,13 +149,21 @@
         }
 
         async function addNewApp() {
-            const name = document.getElementById('admin-name').value;
-            const image_url = document.getElementById('admin-img').value;
-            const download_url = document.getElementById('admin-download').value;
+            const name = document.getElementById('admin-name').value.trim();
+            let image_url = document.getElementById('admin-img').value.trim();
+            let download_url = document.getElementById('admin-download').value.trim();
 
             if (!name || !image_url || !download_url) {
                 alert('الرجاء تعبئة جميع حقول التطبيق (الاسم، الصورة، رابط التحميل)');
                 return;
+            }
+
+            // ضمان وجود بروتوكول http:// أو https:// لمنع التحويل الداخلي في Vercel
+            if (!download_url.startsWith('http://') && !download_url.startsWith('https://')) {
+                download_url = 'https://' + download_url;
+            }
+            if (!image_url.startsWith('http://') && !image_url.startsWith('https://')) {
+                image_url = 'https://' + image_url;
             }
 
             const { error } = await supabaseClient.from('apps').insert([{ name, image_url, download_url }]);
@@ -232,13 +239,19 @@
                     reviewInputBox = `<p class="text-gray-400 text-xs italic mt-2">سجل دخولك بالأعلى لإضافة تقييم.</p>`;
                 }
 
+                // للتأكد من تصحيح الرابط المباشر حتى لو كان محفوظاً قداماً بدون https
+                let cleanDownloadUrl = app.download_url;
+                if (!cleanDownloadUrl.startsWith('http://') && !cleanDownloadUrl.startsWith('https://')) {
+                    cleanDownloadUrl = 'https://' + cleanDownloadUrl;
+                }
+
                 grid.innerHTML += `
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition">
                         <div class="p-4 flex gap-4 items-center">
                             <img src="${app.image_url}" alt="أيقونة" class="w-20 h-20 rounded-xl object-cover border border-gray-100 shadow-xs shrink-0" onerror="this.src='https://via.placeholder.com/80?text=App'">
                             <div class="flex-1 min-w-0">
                                 <h3 class="font-black text-gray-900 text-base truncate mb-1">${app.name}</h3>
-                                <a href="${app.download_url}" target="_blank" class="inline-flex items-center justify-center w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-black text-xs py-2 px-3 rounded-xl transition shadow-xs">تحميل التطبيق 📥</a>
+                                <a href="${cleanDownloadUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center w-full bg-amber-400 hover:bg-amber-500 text-gray-900 font-black text-xs py-2 px-3 rounded-xl transition shadow-xs">تحميل التطبيق 📥</a>
                             </div>
                         </div>
                         <div class="bg-gray-50/50 p-4 border-t border-gray-100 space-y-2">
@@ -278,4 +291,3 @@
     </script>
 </body>
 </html>
-
